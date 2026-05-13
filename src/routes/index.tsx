@@ -192,7 +192,7 @@ function Home() {
                 <p className="text-xs font-medium truncate">{r.name}</p>
                 <p className="text-[10px] text-muted-foreground">{r.category}</p>
               </div>
-            </Link>
+            </a>
           ))}
         </div>
       )}
