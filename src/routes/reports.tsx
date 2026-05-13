@@ -19,18 +19,21 @@ function ReportsPage() {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("all");
   const [drag, setDrag] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const camRef = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<{ name: string; mimeType: string; dataUrl: string } | null>(null);
   const [pendingCat, setPendingCat] = useState("Lab");
 
   const handleFiles = async (files: FileList | null) => {
     if (!files || !files[0]) return;
     const f = files[0];
+    if (f.size > 8 * 1024 * 1024) {
+      toast.error("File too large (max 8 MB)");
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
       setPending({ name: f.name, mimeType: f.type || "application/octet-stream", dataUrl: reader.result as string });
     };
+    reader.onerror = () => toast.error("Could not read file");
     reader.readAsDataURL(f);
   };
 
