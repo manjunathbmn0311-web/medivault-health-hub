@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
-import { DEFAULT_PROFILE, Medication, Profile, Report, TimelineEntry, useLocalStorage } from "@/lib/storage";
+import { DEFAULT_PROFILE, Medication, Period, Profile, Report, TimelineEntry, useLocalStorage } from "@/lib/storage";
 import { QRCodeSVG } from "qrcode.react";
-import { Activity, AlertCircle, Droplet, FileText, Pill, Scissors, Stethoscope } from "lucide-react";
-import { format } from "date-fns";
+import { Activity, AlertCircle, Droplet, FileText, Pill, Scissors, Stethoscope, CalendarHeart } from "lucide-react";
+import { differenceInDays, format } from "date-fns";
 import { motion } from "framer-motion";
+import { useMemo } from "react";
 
 export const Route = createFileRoute("/doctor")({
   head: () => ({ meta: [{ title: "Doctor Mode — MediVault" }] }),
