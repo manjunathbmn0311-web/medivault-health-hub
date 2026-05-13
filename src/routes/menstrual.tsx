@@ -142,6 +142,7 @@ function AddPeriod({ onClose, onSave }: { onClose: () => void; onSave: (p: Omit<
   const [form, setForm] = useState({
     startDate: new Date().toISOString().slice(0, 10),
     endDate: "",
+    padsPerDay: "",
     symptoms: "",
     notes: "",
   });
@@ -156,9 +157,11 @@ function AddPeriod({ onClose, onSave }: { onClose: () => void; onSave: (p: Omit<
           <Field label="Start"><input type="date" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none" /></Field>
           <Field label="End"><input type="date" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none" /></Field>
         </div>
+        <Field label="Pads used per day"><input type="number" min="0" value={form.padsPerDay} onChange={(e) => setForm({ ...form, padsPerDay: e.target.value })} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none" placeholder="e.g. 4" /></Field>
         <Field label="Symptoms"><input value={form.symptoms} onChange={(e) => setForm({ ...form, symptoms: e.target.value })} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none" placeholder="cramps, fatigue…" /></Field>
         <Field label="Notes"><textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none resize-none" /></Field>
-        <button onClick={() => onSave({ ...form, endDate: form.endDate || undefined })} className="mt-2 w-full rounded-2xl gradient-primary text-primary-foreground py-3.5 font-semibold shadow-glow">Save</button>
+        <button onClick={() => onSave({ startDate: form.startDate, endDate: form.endDate || undefined, padsPerDay: form.padsPerDay ? Number(form.padsPerDay) : undefined, symptoms: form.symptoms, notes: form.notes })} className="mt-2 w-full rounded-2xl gradient-primary text-primary-foreground py-3.5 font-semibold shadow-glow">Save</button>
+
       </motion.div>
     </motion.div>
   );
