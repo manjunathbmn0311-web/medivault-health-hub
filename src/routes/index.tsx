@@ -173,10 +173,13 @@ function Home() {
       ) : (
         <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2">
           {reports.slice(-6).reverse().map((r) => (
-            <Link
+            <a
               key={r.id}
-              to="/reports"
-              className="shrink-0 w-32 rounded-2xl bg-card shadow-soft overflow-hidden"
+              href={r.dataUrl}
+              target="_blank"
+              rel="noreferrer"
+              download={r.name}
+              className="shrink-0 w-32 rounded-2xl bg-card shadow-soft overflow-hidden active:scale-95 transition"
             >
               <div className="h-24 bg-muted grid place-items-center">
                 {r.mimeType.startsWith("image/") ? (
