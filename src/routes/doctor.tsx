@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
-import { DEFAULT_PROFILE, Medication, Period, Profile, Report, TimelineEntry, useLocalStorage } from "@/lib/storage";
+import { DEFAULT_PROFILE, Medication, Period, Profile, Report, TimelineEntry, uid, useLocalStorage } from "@/lib/storage";
 import { QRCodeSVG } from "qrcode.react";
-import { Activity, AlertCircle, Droplet, FileText, Pill, Scissors, Stethoscope, CalendarHeart } from "lucide-react";
+import { Activity, AlertCircle, Droplet, FileText, Pill, Plus, Scissors, Stethoscope, Trash2, CalendarHeart } from "lucide-react";
 import { differenceInDays, format } from "date-fns";
-import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useMemo, useState } from "react";
 
 export const Route = createFileRoute("/doctor")({
   head: () => ({ meta: [{ title: "Doctor Mode — MediVault" }] }),
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/doctor")({
 
 function DoctorPage() {
   const [profile] = useLocalStorage<Profile>("mv-profile", DEFAULT_PROFILE);
-  const [timeline] = useLocalStorage<TimelineEntry[]>("mv-timeline", []);
+  const [timeline, setTimeline] = useLocalStorage<TimelineEntry[]>("mv-timeline", []);
   const [reports] = useLocalStorage<Report[]>("mv-reports", []);
   const [meds] = useLocalStorage<Medication[]>("mv-meds", []);
   const [periods] = useLocalStorage<Period[]>("mv-periods", []);
@@ -31,7 +31,7 @@ function DoctorPage() {
     return { avgCycle, avgFlow, avgPads, last: sorted[0] };
   }, [periods]);
 
-  const surgeries = timeline.filter((t) => t.type === "surgery").slice(0, 3);
+  const surgeries = timeline.filter((t) => t.type === "surgery").sort((a, b) => b.date.localeCompare(a.date));
   const diagnoses = timeline.filter((t) => t.type === "diagnosis").slice(0, 3);
   const recentReports = [...reports].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 4);
 
@@ -76,13 +76,18 @@ function DoctorPage() {
         }
       </Block>
 
-      {surgeries.length > 0 && (
-        <Block title="Past surgeries" icon={Scissors}>
-          <ul className="space-y-1">
-            {surgeries.map((s) => <li key={s.id} className="text-sm">• {s.title} <span className="text-xs text-muted-foreground">({format(new Date(s.date), "MMM yyyy")})</span></li>)}
-          </ul>
-        </Block>
-      )}
+      <Block title="Past surgical history" icon={Scissors}>
+        <SurgeryEditor
+          surgeries={surgeries}
+          onAdd={(title, date) =>
+            setTimeline([
+              { id: uid(), type: "surgery", title, date },
+              ...timeline,
+            ])
+          }
+          onRemove={(id) => setTimeline(timeline.filter((t) => t.id !== id))}
+        />
+      </Block>
 
       {menstrual && (
         <Block title="Menstrual history" icon={CalendarHeart}>
@@ -151,6 +156,81 @@ function Stat3({ label, value }: { label: string; value: string }) {
     <div className="rounded-2xl bg-muted px-3 py-2 text-center">
       <p className="text-[10px] text-muted-foreground">{label}</p>
       <p className="font-semibold text-sm mt-0.5">{value}</p>
+    </div>
+  );
+}
+
+function SurgeryEditor({
+  surgeries,
+  onAdd,
+  onRemove,
+}: {
+  surgeries: TimelineEntry[];
+  onAdd: (title: string, date: string) => void;
+  onRemove: (id: string) => void;
+}) {
+  const [title, setTitle] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const submit = () => {
+    if (!title.trim()) return;
+    onAdd(title.trim(), date);
+    setTitle("");
+  };
+  return (
+    <div>
+      {surgeries.length === 0 ? (
+        <p className="text-sm text-muted-foreground mb-2">No surgeries recorded.</p>
+      ) : (
+        <ul className="space-y-1.5 mb-3">
+          <AnimatePresence>
+            {surgeries.map((s) => (
+              <motion.li
+                key={s.id}
+                layout
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 8 }}
+                className="flex items-center justify-between gap-2 rounded-xl bg-muted px-3 py-2"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{s.title}</p>
+                  <p className="text-[10px] text-muted-foreground">{format(new Date(s.date), "dd MMM yyyy")}</p>
+                </div>
+                <button
+                  onClick={() => onRemove(s.id)}
+                  aria-label="Remove"
+                  className="h-8 w-8 shrink-0 rounded-lg bg-background grid place-items-center text-muted-foreground active:scale-90 transition"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </motion.li>
+            ))}
+          </AnimatePresence>
+        </ul>
+      )}
+      <div className="flex gap-2">
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); submit(); } }}
+          placeholder="Surgery name"
+          className="flex-1 min-w-0 rounded-xl bg-muted px-3 py-2 text-sm outline-none"
+        />
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="rounded-xl bg-muted px-2 py-2 text-xs outline-none"
+        />
+        <button
+          type="button"
+          onClick={submit}
+          aria-label="Add surgery"
+          className="h-10 w-10 shrink-0 rounded-xl gradient-primary text-primary-foreground grid place-items-center shadow-soft active:scale-90 transition"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+      </div>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { PageShell } from "@/components/PageShell";
 import { useLocalStorage, DEFAULT_PROFILE, Profile, TimelineEntry, Report, Medication } from "@/lib/storage";
-import { Activity, AlertCircle, Droplet, Phone, Stethoscope, FileText, Pill, Clock, Calendar, QrCode, ShieldAlert, Sparkles } from "lucide-react";
+import { Activity, AlertCircle, Droplet, Phone, User, FileText, Pill, Clock, Calendar, QrCode, ShieldAlert, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -61,8 +61,8 @@ function Home() {
             {profile.name ? profile.name.split(" ")[0] : "Welcome"} 👋
           </h1>
         </div>
-        <Link to="/doctor" className="h-11 w-11 rounded-2xl gradient-primary shadow-glow grid place-items-center text-primary-foreground">
-          <Stethoscope className="h-5 w-5" />
+        <Link to="/profile" className="h-11 w-11 rounded-2xl gradient-primary shadow-glow grid place-items-center text-primary-foreground">
+          <User className="h-5 w-5" />
         </Link>
       </motion.header>
 
@@ -173,10 +173,13 @@ function Home() {
       ) : (
         <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2">
           {reports.slice(-6).reverse().map((r) => (
-            <Link
+            <a
               key={r.id}
-              to="/reports"
-              className="shrink-0 w-32 rounded-2xl bg-card shadow-soft overflow-hidden"
+              href={r.dataUrl}
+              target="_blank"
+              rel="noreferrer"
+              download={r.name}
+              className="shrink-0 w-32 rounded-2xl bg-card shadow-soft overflow-hidden active:scale-95 transition"
             >
               <div className="h-24 bg-muted grid place-items-center">
                 {r.mimeType.startsWith("image/") ? (
@@ -189,7 +192,7 @@ function Home() {
                 <p className="text-xs font-medium truncate">{r.name}</p>
                 <p className="text-[10px] text-muted-foreground">{r.category}</p>
               </div>
-            </Link>
+            </a>
           ))}
         </div>
       )}

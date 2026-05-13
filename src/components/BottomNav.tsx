@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Home, Clock, FileText, Pill, User } from "lucide-react";
+import { Home, Clock, FileText, Pill, Stethoscope } from "lucide-react";
 import { motion } from "framer-motion";
 
 const items = [
@@ -7,7 +7,7 @@ const items = [
   { to: "/timeline", icon: Clock, label: "Timeline" },
   { to: "/reports", icon: FileText, label: "Reports" },
   { to: "/medications", icon: Pill, label: "Meds" },
-  { to: "/profile", icon: User, label: "Profile" },
+  { to: "/doctor", icon: Stethoscope, label: "Doctor" },
 ] as const;
 
 export function BottomNav() {
