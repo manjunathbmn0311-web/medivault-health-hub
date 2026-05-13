@@ -93,34 +93,26 @@ function ReportsPage() {
         <p className="mt-3 text-sm font-semibold">Upload a report</p>
         <p className="text-xs text-muted-foreground">Image, PDF, X-ray, prescription</p>
         <div className="mt-3 flex gap-2 justify-center">
-          <button
-            onClick={() => fileRef.current?.click()}
-            className="rounded-xl bg-primary text-primary-foreground text-xs font-medium px-3 py-2 flex items-center gap-1"
-          >
+          <label className="cursor-pointer rounded-xl bg-primary text-primary-foreground text-xs font-medium px-3 py-2 flex items-center gap-1 active:scale-95 transition">
             <ImageIcon className="h-3.5 w-3.5" /> Choose file
-          </button>
-          <button
-            onClick={() => camRef.current?.click()}
-            className="rounded-xl bg-card shadow-soft text-xs font-medium px-3 py-2 flex items-center gap-1"
-          >
+            <input
+              type="file"
+              accept="image/*,application/pdf"
+              className="hidden"
+              onChange={(e) => { handleFiles(e.target.files); e.target.value = ""; }}
+            />
+          </label>
+          <label className="cursor-pointer rounded-xl bg-card shadow-soft text-xs font-medium px-3 py-2 flex items-center gap-1 active:scale-95 transition">
             <Camera className="h-3.5 w-3.5" /> Camera
-          </button>
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => { handleFiles(e.target.files); e.target.value = ""; }}
+            />
+          </label>
         </div>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*,application/pdf"
-          className="hidden"
-          onChange={(e) => handleFiles(e.target.files)}
-        />
-        <input
-          ref={camRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          className="hidden"
-          onChange={(e) => handleFiles(e.target.files)}
-        />
       </motion.div>
 
       <div className="grid grid-cols-2 gap-3">
