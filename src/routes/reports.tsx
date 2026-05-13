@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PageShell } from "@/components/PageShell";
 import { Report, uid, useLocalStorage } from "@/lib/storage";
 import { Upload, FileText, Image as ImageIcon, X, Camera, Search } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { format } from "date-fns";
 
 export const Route = createFileRoute("/reports")({
