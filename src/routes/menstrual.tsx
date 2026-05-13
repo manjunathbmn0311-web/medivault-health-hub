@@ -24,6 +24,14 @@ function MenstrualPage() {
     const diffs = sorted.slice(0, 5).map((p, i, arr) => i < arr.length - 1 ? differenceInDays(new Date(p.startDate), new Date(arr[i + 1].startDate)) : 0).filter(Boolean);
     return diffs.length ? Math.round(diffs.reduce((a, b) => a + b, 0) / diffs.length) : 28;
   }, [sorted]);
+  const avgFlow = useMemo(() => {
+    const ds = sorted.filter((p) => p.endDate).map((p) => differenceInDays(new Date(p.endDate!), new Date(p.startDate)) + 1).filter((n) => n > 0);
+    return ds.length ? Math.round(ds.reduce((a, b) => a + b, 0) / ds.length) : 0;
+  }, [sorted]);
+  const avgPads = useMemo(() => {
+    const ps = sorted.map((p) => p.padsPerDay).filter((n): n is number => typeof n === "number" && n > 0);
+    return ps.length ? Math.round((ps.reduce((a, b) => a + b, 0) / ps.length) * 10) / 10 : 0;
+  }, [sorted]);
   const nextPredicted = last ? addDays(new Date(last.startDate), avgCycle) : null;
 
   const isPeriodDay = (d: Date) => periods.some((p) => {
@@ -52,6 +60,16 @@ function MenstrualPage() {
         {last && (
           <p className="text-sm opacity-90 mt-1">Last period: {format(new Date(last.startDate), "dd MMM")}</p>
         )}
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="rounded-2xl bg-white/15 backdrop-blur px-3 py-2">
+            <p className="text-[10px] opacity-80">Avg flow</p>
+            <p className="font-semibold text-sm">{avgFlow ? `${avgFlow} days` : "—"}</p>
+          </div>
+          <div className="rounded-2xl bg-white/15 backdrop-blur px-3 py-2">
+            <p className="text-[10px] opacity-80">Avg pads/day</p>
+            <p className="font-semibold text-sm">{avgPads || "—"}</p>
+          </div>
+        </div>
         {nextPredicted && (
           <div className="mt-3 rounded-2xl bg-white/15 backdrop-blur px-3 py-2 text-sm">
             Next predicted: <strong>{format(nextPredicted, "dd MMM yyyy")}</strong>
@@ -124,6 +142,7 @@ function AddPeriod({ onClose, onSave }: { onClose: () => void; onSave: (p: Omit<
   const [form, setForm] = useState({
     startDate: new Date().toISOString().slice(0, 10),
     endDate: "",
+    padsPerDay: "",
     symptoms: "",
     notes: "",
   });
@@ -138,9 +157,11 @@ function AddPeriod({ onClose, onSave }: { onClose: () => void; onSave: (p: Omit<
           <Field label="Start"><input type="date" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none" /></Field>
           <Field label="End"><input type="date" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none" /></Field>
         </div>
+        <Field label="Pads used per day"><input type="number" min="0" value={form.padsPerDay} onChange={(e) => setForm({ ...form, padsPerDay: e.target.value })} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none" placeholder="e.g. 4" /></Field>
         <Field label="Symptoms"><input value={form.symptoms} onChange={(e) => setForm({ ...form, symptoms: e.target.value })} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none" placeholder="cramps, fatigue…" /></Field>
         <Field label="Notes"><textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none resize-none" /></Field>
-        <button onClick={() => onSave({ ...form, endDate: form.endDate || undefined })} className="mt-2 w-full rounded-2xl gradient-primary text-primary-foreground py-3.5 font-semibold shadow-glow">Save</button>
+        <button onClick={() => onSave({ startDate: form.startDate, endDate: form.endDate || undefined, padsPerDay: form.padsPerDay ? Number(form.padsPerDay) : undefined, symptoms: form.symptoms, notes: form.notes })} className="mt-2 w-full rounded-2xl gradient-primary text-primary-foreground py-3.5 font-semibold shadow-glow">Save</button>
+
       </motion.div>
     </motion.div>
   );

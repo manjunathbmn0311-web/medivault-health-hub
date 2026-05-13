@@ -3,8 +3,8 @@ import { PageShell } from "@/components/PageShell";
 import { useLocalStorage, Profile, DEFAULT_PROFILE } from "@/lib/storage";
 import { Field } from "./timeline";
 import { useState } from "react";
-import { Check } from "lucide-react";
-import { motion } from "framer-motion";
+import { Check, Plus, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Profile — MediVault" }] }),
@@ -48,8 +48,20 @@ function ProfilePage() {
             ))}
           </div>
         </Field>
-        <Field label="Allergies"><input value={draft.allergies} onChange={(e) => setDraft({ ...draft, allergies: e.target.value })} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none" placeholder="e.g. Penicillin, Peanuts" /></Field>
-        <Field label="Chronic conditions"><input value={draft.chronic} onChange={(e) => setDraft({ ...draft, chronic: e.target.value })} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none" placeholder="e.g. Diabetes, Asthma" /></Field>
+        <Field label="Allergies">
+          <ChipInput
+            value={draft.allergies}
+            onChange={(v) => setDraft({ ...draft, allergies: v })}
+            placeholder="Add allergy"
+          />
+        </Field>
+        <Field label="Chronic conditions">
+          <ChipInput
+            value={draft.chronic}
+            onChange={(v) => setDraft({ ...draft, chronic: v })}
+            placeholder="Add condition"
+          />
+        </Field>
         <div className="grid grid-cols-2 gap-2">
           <Field label="Emergency contact"><input value={draft.emergencyName} onChange={(e) => setDraft({ ...draft, emergencyName: e.target.value })} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none" /></Field>
           <Field label="Phone"><input value={draft.emergencyPhone} onChange={(e) => setDraft({ ...draft, emergencyPhone: e.target.value })} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none" placeholder="+91…" /></Field>
@@ -68,5 +80,60 @@ function ProfilePage() {
         Your data is stored locally on this device only.
       </p>
     </PageShell>
+  );
+}
+
+function ChipInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
+  const [draft, setDraft] = useState("");
+  const items = value ? value.split(",").map((s) => s.trim()).filter(Boolean) : [];
+  const add = () => {
+    const v = draft.trim();
+    if (!v || items.includes(v)) { setDraft(""); return; }
+    onChange([...items, v].join(", "));
+    setDraft("");
+  };
+  const remove = (i: number) => onChange(items.filter((_, idx) => idx !== i).join(", "));
+  return (
+    <div>
+      <div className="flex gap-2">
+        <input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
+          placeholder={placeholder}
+          className="flex-1 rounded-xl bg-muted px-3 py-2.5 text-sm outline-none"
+        />
+        <motion.button
+          type="button"
+          whileTap={{ scale: 0.9 }}
+          onClick={add}
+          aria-label="Add"
+          className="h-10 w-10 shrink-0 rounded-xl gradient-primary text-primary-foreground grid place-items-center shadow-soft"
+        >
+          <Plus className="h-4 w-4" />
+        </motion.button>
+      </div>
+      {items.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          <AnimatePresence>
+            {items.map((it, i) => (
+              <motion.span
+                key={it}
+                layout
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="inline-flex items-center gap-1 pl-3 pr-1 py-1 rounded-full bg-accent text-accent-foreground text-xs"
+              >
+                {it}
+                <button onClick={() => remove(i)} className="h-5 w-5 rounded-full bg-background/40 grid place-items-center" aria-label={`Remove ${it}`}>
+                  <X className="h-3 w-3" />
+                </button>
+              </motion.span>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+    </div>
   );
 }

@@ -63,6 +63,7 @@ export type Period = {
   startDate: string;
   endDate?: string;
   cycleLength?: number;
+  padsPerDay?: number;
   symptoms?: string;
   notes?: string;
 };

@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
-import { DEFAULT_PROFILE, Medication, Profile, Report, TimelineEntry, useLocalStorage } from "@/lib/storage";
+import { DEFAULT_PROFILE, Medication, Period, Profile, Report, TimelineEntry, useLocalStorage } from "@/lib/storage";
 import { QRCodeSVG } from "qrcode.react";
-import { Activity, AlertCircle, Droplet, FileText, Pill, Scissors, Stethoscope } from "lucide-react";
-import { format } from "date-fns";
+import { Activity, AlertCircle, Droplet, FileText, Pill, Scissors, Stethoscope, CalendarHeart } from "lucide-react";
+import { differenceInDays, format } from "date-fns";
 import { motion } from "framer-motion";
+import { useMemo } from "react";
 
 export const Route = createFileRoute("/doctor")({
   head: () => ({ meta: [{ title: "Doctor Mode — MediVault" }] }),
@@ -16,6 +17,19 @@ function DoctorPage() {
   const [timeline] = useLocalStorage<TimelineEntry[]>("mv-timeline", []);
   const [reports] = useLocalStorage<Report[]>("mv-reports", []);
   const [meds] = useLocalStorage<Medication[]>("mv-meds", []);
+  const [periods] = useLocalStorage<Period[]>("mv-periods", []);
+
+  const menstrual = useMemo(() => {
+    const sorted = [...periods].sort((a, b) => b.startDate.localeCompare(a.startDate));
+    if (sorted.length === 0) return null;
+    const cycles = sorted.slice(0, 6).map((p, i, a) => i < a.length - 1 ? differenceInDays(new Date(p.startDate), new Date(a[i + 1].startDate)) : 0).filter(Boolean);
+    const avgCycle = cycles.length ? Math.round(cycles.reduce((x, y) => x + y, 0) / cycles.length) : null;
+    const flows = sorted.filter((p) => p.endDate).map((p) => differenceInDays(new Date(p.endDate!), new Date(p.startDate)) + 1).filter((n) => n > 0);
+    const avgFlow = flows.length ? Math.round(flows.reduce((x, y) => x + y, 0) / flows.length) : null;
+    const pads = sorted.map((p) => p.padsPerDay).filter((n): n is number => typeof n === "number" && n > 0);
+    const avgPads = pads.length ? Math.round((pads.reduce((x, y) => x + y, 0) / pads.length) * 10) / 10 : null;
+    return { avgCycle, avgFlow, avgPads, last: sorted[0] };
+  }, [periods]);
 
   const surgeries = timeline.filter((t) => t.type === "surgery").slice(0, 3);
   const diagnoses = timeline.filter((t) => t.type === "diagnosis").slice(0, 3);
@@ -70,6 +84,19 @@ function DoctorPage() {
         </Block>
       )}
 
+      {menstrual && (
+        <Block title="Menstrual history" icon={CalendarHeart}>
+          <div className="grid grid-cols-3 gap-2">
+            <Stat3 label="Avg cycle" value={menstrual.avgCycle ? `${menstrual.avgCycle}d` : "—"} />
+            <Stat3 label="Avg flow" value={menstrual.avgFlow ? `${menstrual.avgFlow}d` : "—"} />
+            <Stat3 label="Avg pads/day" value={menstrual.avgPads ? String(menstrual.avgPads) : "—"} />
+          </div>
+          {menstrual.last && (
+            <p className="text-xs text-muted-foreground mt-2">Last period: {format(new Date(menstrual.last.startDate), "dd MMM yyyy")}</p>
+          )}
+        </Block>
+      )}
+
       <Block title="Recent reports" icon={FileText}>
         {recentReports.length === 0 ? <p className="text-sm text-muted-foreground">None</p> :
           <div className="grid grid-cols-4 gap-2">
@@ -116,5 +143,14 @@ function Block({ title, icon: Icon, children }: any) {
       </h3>
       {children}
     </motion.section>
+  );
+}
+
+function Stat3({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-muted px-3 py-2 text-center">
+      <p className="text-[10px] text-muted-foreground">{label}</p>
+      <p className="font-semibold text-sm mt-0.5">{value}</p>
+    </div>
   );
 }

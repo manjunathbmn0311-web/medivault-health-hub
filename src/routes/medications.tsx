@@ -88,10 +88,14 @@ function PillCard({ m, i, onToggle, onDelete }: { m: Medication; i: number; onTo
         </p>
       </div>
       <div className="flex flex-col gap-1.5">
-        <button onClick={onToggle} className="h-8 w-8 rounded-xl bg-muted grid place-items-center" aria-label="Toggle">
-          <Power className="h-3.5 w-3.5" />
+        <button
+          onClick={onToggle}
+          className={`h-8 px-2.5 rounded-xl text-[10px] font-semibold flex items-center gap-1 ${m.active ? "bg-warning/15 text-warning" : "bg-success/15 text-success"}`}
+          aria-label={m.active ? "Stop" : "Resume"}
+        >
+          <Power className="h-3 w-3" /> {m.active ? "Stop" : "Resume"}
         </button>
-        <button onClick={onDelete} className="h-8 w-8 rounded-xl bg-muted grid place-items-center text-destructive">
+        <button onClick={onDelete} className="h-8 px-2.5 rounded-xl bg-muted grid place-items-center text-destructive">
           <X className="h-3.5 w-3.5" />
         </button>
       </div>
