@@ -84,6 +84,19 @@ function DoctorPage() {
         </Block>
       )}
 
+      {menstrual && (
+        <Block title="Menstrual history" icon={CalendarHeart}>
+          <div className="grid grid-cols-3 gap-2">
+            <Stat3 label="Avg cycle" value={menstrual.avgCycle ? `${menstrual.avgCycle}d` : "—"} />
+            <Stat3 label="Avg flow" value={menstrual.avgFlow ? `${menstrual.avgFlow}d` : "—"} />
+            <Stat3 label="Avg pads/day" value={menstrual.avgPads ? String(menstrual.avgPads) : "—"} />
+          </div>
+          {menstrual.last && (
+            <p className="text-xs text-muted-foreground mt-2">Last period: {format(new Date(menstrual.last.startDate), "dd MMM yyyy")}</p>
+          )}
+        </Block>
+      )}
+
       <Block title="Recent reports" icon={FileText}>
         {recentReports.length === 0 ? <p className="text-sm text-muted-foreground">None</p> :
           <div className="grid grid-cols-4 gap-2">
