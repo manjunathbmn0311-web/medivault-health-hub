@@ -150,6 +150,7 @@
   }
   .gradient-primary { background: var(--gradient-primary); }
   .gradient-soft { background: var(--gradient-soft); }
+  .dark .gradient-soft { background: linear-gradient(180deg, oklch(0.16 0.02 240), oklch(0.2 0.03 245)); }
   .shadow-soft { box-shadow: var(--shadow-soft); }
   .shadow-card { box-shadow: var(--shadow-card); }
   .shadow-glow { box-shadow: var(--shadow-glow); }
