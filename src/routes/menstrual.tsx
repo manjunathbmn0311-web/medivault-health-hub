@@ -24,6 +24,14 @@ function MenstrualPage() {
     const diffs = sorted.slice(0, 5).map((p, i, arr) => i < arr.length - 1 ? differenceInDays(new Date(p.startDate), new Date(arr[i + 1].startDate)) : 0).filter(Boolean);
     return diffs.length ? Math.round(diffs.reduce((a, b) => a + b, 0) / diffs.length) : 28;
   }, [sorted]);
+  const avgFlow = useMemo(() => {
+    const ds = sorted.filter((p) => p.endDate).map((p) => differenceInDays(new Date(p.endDate!), new Date(p.startDate)) + 1).filter((n) => n > 0);
+    return ds.length ? Math.round(ds.reduce((a, b) => a + b, 0) / ds.length) : 0;
+  }, [sorted]);
+  const avgPads = useMemo(() => {
+    const ps = sorted.map((p) => p.padsPerDay).filter((n): n is number => typeof n === "number" && n > 0);
+    return ps.length ? Math.round((ps.reduce((a, b) => a + b, 0) / ps.length) * 10) / 10 : 0;
+  }, [sorted]);
   const nextPredicted = last ? addDays(new Date(last.startDate), avgCycle) : null;
 
   const isPeriodDay = (d: Date) => periods.some((p) => {
