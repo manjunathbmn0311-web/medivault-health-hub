@@ -60,6 +60,16 @@ function MenstrualPage() {
         {last && (
           <p className="text-sm opacity-90 mt-1">Last period: {format(new Date(last.startDate), "dd MMM")}</p>
         )}
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="rounded-2xl bg-white/15 backdrop-blur px-3 py-2">
+            <p className="text-[10px] opacity-80">Avg flow</p>
+            <p className="font-semibold text-sm">{avgFlow ? `${avgFlow} days` : "—"}</p>
+          </div>
+          <div className="rounded-2xl bg-white/15 backdrop-blur px-3 py-2">
+            <p className="text-[10px] opacity-80">Avg pads/day</p>
+            <p className="font-semibold text-sm">{avgPads || "—"}</p>
+          </div>
+        </div>
         {nextPredicted && (
           <div className="mt-3 rounded-2xl bg-white/15 backdrop-blur px-3 py-2 text-sm">
             Next predicted: <strong>{format(nextPredicted, "dd MMM yyyy")}</strong>
