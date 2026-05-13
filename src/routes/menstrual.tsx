@@ -120,7 +120,7 @@ function MenstrualPage() {
   );
 }
 
-function AddPeriod({ onClose, onSave }: any) {
+function AddPeriod({ onClose, onSave }: { onClose: () => void; onSave: (p: Omit<Period, "id">) => void }) {
   const [form, setForm] = useState({
     startDate: new Date().toISOString().slice(0, 10),
     endDate: "",
