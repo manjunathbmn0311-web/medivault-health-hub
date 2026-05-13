@@ -48,8 +48,20 @@ function ProfilePage() {
             ))}
           </div>
         </Field>
-        <Field label="Allergies"><input value={draft.allergies} onChange={(e) => setDraft({ ...draft, allergies: e.target.value })} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none" placeholder="e.g. Penicillin, Peanuts" /></Field>
-        <Field label="Chronic conditions"><input value={draft.chronic} onChange={(e) => setDraft({ ...draft, chronic: e.target.value })} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none" placeholder="e.g. Diabetes, Asthma" /></Field>
+        <Field label="Allergies">
+          <ChipInput
+            value={draft.allergies}
+            onChange={(v) => setDraft({ ...draft, allergies: v })}
+            placeholder="Add allergy"
+          />
+        </Field>
+        <Field label="Chronic conditions">
+          <ChipInput
+            value={draft.chronic}
+            onChange={(v) => setDraft({ ...draft, chronic: v })}
+            placeholder="Add condition"
+          />
+        </Field>
         <div className="grid grid-cols-2 gap-2">
           <Field label="Emergency contact"><input value={draft.emergencyName} onChange={(e) => setDraft({ ...draft, emergencyName: e.target.value })} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none" /></Field>
           <Field label="Phone"><input value={draft.emergencyPhone} onChange={(e) => setDraft({ ...draft, emergencyPhone: e.target.value })} className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none" placeholder="+91…" /></Field>
