@@ -214,6 +214,7 @@ function ReportsPage() {
                     ...reports,
                   ]);
                   setPending(null);
+                  toast.success("Report saved");
                 }}
                 className="w-full rounded-2xl gradient-primary text-primary-foreground py-3.5 font-semibold shadow-glow"
               >
