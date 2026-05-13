@@ -17,6 +17,19 @@ function DoctorPage() {
   const [timeline] = useLocalStorage<TimelineEntry[]>("mv-timeline", []);
   const [reports] = useLocalStorage<Report[]>("mv-reports", []);
   const [meds] = useLocalStorage<Medication[]>("mv-meds", []);
+  const [periods] = useLocalStorage<Period[]>("mv-periods", []);
+
+  const menstrual = useMemo(() => {
+    const sorted = [...periods].sort((a, b) => b.startDate.localeCompare(a.startDate));
+    if (sorted.length === 0) return null;
+    const cycles = sorted.slice(0, 6).map((p, i, a) => i < a.length - 1 ? differenceInDays(new Date(p.startDate), new Date(a[i + 1].startDate)) : 0).filter(Boolean);
+    const avgCycle = cycles.length ? Math.round(cycles.reduce((x, y) => x + y, 0) / cycles.length) : null;
+    const flows = sorted.filter((p) => p.endDate).map((p) => differenceInDays(new Date(p.endDate!), new Date(p.startDate)) + 1).filter((n) => n > 0);
+    const avgFlow = flows.length ? Math.round(flows.reduce((x, y) => x + y, 0) / flows.length) : null;
+    const pads = sorted.map((p) => p.padsPerDay).filter((n): n is number => typeof n === "number" && n > 0);
+    const avgPads = pads.length ? Math.round((pads.reduce((x, y) => x + y, 0) / pads.length) * 10) / 10 : null;
+    return { avgCycle, avgFlow, avgPads, last: sorted[0] };
+  }, [periods]);
 
   const surgeries = timeline.filter((t) => t.type === "surgery").slice(0, 3);
   const diagnoses = timeline.filter((t) => t.type === "diagnosis").slice(0, 3);
