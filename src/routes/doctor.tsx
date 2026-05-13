@@ -145,3 +145,12 @@ function Block({ title, icon: Icon, children }: any) {
     </motion.section>
   );
 }
+
+function Stat3({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-muted px-3 py-2 text-center">
+      <p className="text-[10px] text-muted-foreground">{label}</p>
+      <p className="font-semibold text-sm mt-0.5">{value}</p>
+    </div>
+  );
+}
