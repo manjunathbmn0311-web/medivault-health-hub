@@ -3,8 +3,8 @@ import { PageShell } from "@/components/PageShell";
 import { useLocalStorage, Profile, DEFAULT_PROFILE } from "@/lib/storage";
 import { Field } from "./timeline";
 import { useState } from "react";
-import { Check } from "lucide-react";
-import { motion } from "framer-motion";
+import { Check, Plus, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Profile — MediVault" }] }),
