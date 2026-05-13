@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
-import { DEFAULT_PROFILE, Medication, Period, Profile, Report, TimelineEntry, useLocalStorage } from "@/lib/storage";
+import { DEFAULT_PROFILE, Medication, Period, Profile, Report, TimelineEntry, uid, useLocalStorage } from "@/lib/storage";
 import { QRCodeSVG } from "qrcode.react";
-import { Activity, AlertCircle, Droplet, FileText, Pill, Scissors, Stethoscope, CalendarHeart } from "lucide-react";
+import { Activity, AlertCircle, Droplet, FileText, Pill, Plus, Scissors, Stethoscope, Trash2, CalendarHeart } from "lucide-react";
 import { differenceInDays, format } from "date-fns";
-import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useMemo, useState } from "react";
 
 export const Route = createFileRoute("/doctor")({
   head: () => ({ meta: [{ title: "Doctor Mode — MediVault" }] }),
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/doctor")({
 
 function DoctorPage() {
   const [profile] = useLocalStorage<Profile>("mv-profile", DEFAULT_PROFILE);
-  const [timeline] = useLocalStorage<TimelineEntry[]>("mv-timeline", []);
+  const [timeline, setTimeline] = useLocalStorage<TimelineEntry[]>("mv-timeline", []);
   const [reports] = useLocalStorage<Report[]>("mv-reports", []);
   const [meds] = useLocalStorage<Medication[]>("mv-meds", []);
   const [periods] = useLocalStorage<Period[]>("mv-periods", []);
@@ -31,7 +31,7 @@ function DoctorPage() {
     return { avgCycle, avgFlow, avgPads, last: sorted[0] };
   }, [periods]);
 
-  const surgeries = timeline.filter((t) => t.type === "surgery").slice(0, 3);
+  const surgeries = timeline.filter((t) => t.type === "surgery").sort((a, b) => b.date.localeCompare(a.date));
   const diagnoses = timeline.filter((t) => t.type === "diagnosis").slice(0, 3);
   const recentReports = [...reports].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 4);
 
@@ -76,13 +76,18 @@ function DoctorPage() {
         }
       </Block>
 
-      {surgeries.length > 0 && (
-        <Block title="Past surgeries" icon={Scissors}>
-          <ul className="space-y-1">
-            {surgeries.map((s) => <li key={s.id} className="text-sm">• {s.title} <span className="text-xs text-muted-foreground">({format(new Date(s.date), "MMM yyyy")})</span></li>)}
-          </ul>
-        </Block>
-      )}
+      <Block title="Past surgical history" icon={Scissors}>
+        <SurgeryEditor
+          surgeries={surgeries}
+          onAdd={(title, date) =>
+            setTimeline([
+              { id: uid(), type: "surgery", title, date },
+              ...timeline,
+            ])
+          }
+          onRemove={(id) => setTimeline(timeline.filter((t) => t.id !== id))}
+        />
+      </Block>
 
       {menstrual && (
         <Block title="Menstrual history" icon={CalendarHeart}>
