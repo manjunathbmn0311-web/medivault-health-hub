@@ -1,0 +1,120 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { PageShell } from "@/components/PageShell";
+import { DEFAULT_PROFILE, Medication, Profile, Report, TimelineEntry, useLocalStorage } from "@/lib/storage";
+import { QRCodeSVG } from "qrcode.react";
+import { Activity, AlertCircle, Droplet, FileText, Pill, Scissors, Stethoscope } from "lucide-react";
+import { format } from "date-fns";
+import { motion } from "framer-motion";
+
+export const Route = createFileRoute("/doctor")({
+  head: () => ({ meta: [{ title: "Doctor Mode — MediVault" }] }),
+  component: DoctorPage,
+});
+
+function DoctorPage() {
+  const [profile] = useLocalStorage<Profile>("mv-profile", DEFAULT_PROFILE);
+  const [timeline] = useLocalStorage<TimelineEntry[]>("mv-timeline", []);
+  const [reports] = useLocalStorage<Report[]>("mv-reports", []);
+  const [meds] = useLocalStorage<Medication[]>("mv-meds", []);
+
+  const surgeries = timeline.filter((t) => t.type === "surgery").slice(0, 3);
+  const diagnoses = timeline.filter((t) => t.type === "diagnosis").slice(0, 3);
+  const recentReports = [...reports].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 4);
+
+  const summary = JSON.stringify({
+    name: profile.name, blood: profile.bloodGroup, allergies: profile.allergies,
+    chronic: profile.chronic, meds: meds.filter((m) => m.active).map((m) => `${m.name} ${m.dosage}`),
+    diagnoses: diagnoses.map((d) => d.title),
+  });
+
+  return (
+    <PageShell title="Doctor Mode" subtitle="30-second medical summary" back="/">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-3xl gradient-primary text-primary-foreground p-5 shadow-glow mb-4"
+      >
+        <p className="text-xs opacity-80">Patient</p>
+        <p className="text-2xl font-bold">{profile.name || "Unknown"}</p>
+        <p className="text-sm opacity-90">{profile.age && `${profile.age} yrs`}{profile.gender && ` • ${profile.gender}`}</p>
+        <div className="mt-4 flex gap-2">
+          <Pill2 icon={Droplet} label="Blood" value={profile.bloodGroup} />
+          <Pill2 icon={AlertCircle} label="Allergies" value={profile.allergies || "None"} />
+        </div>
+      </motion.div>
+
+      <Block title="Chronic & Conditions" icon={Activity}>
+        <p className="text-sm">{profile.chronic || "None reported"}</p>
+        {diagnoses.length > 0 && (
+          <ul className="mt-2 space-y-1">
+            {diagnoses.map((d) => <li key={d.id} className="text-sm flex justify-between"><span>• {d.title}</span><span className="text-xs text-muted-foreground">{format(new Date(d.date), "MMM yy")}</span></li>)}
+          </ul>
+        )}
+      </Block>
+
+      <Block title="Current medications" icon={Pill}>
+        {meds.filter((m) => m.active).length === 0 ? <p className="text-sm text-muted-foreground">None</p> :
+          <ul className="space-y-1.5">
+            {meds.filter((m) => m.active).map((m) => (
+              <li key={m.id} className="text-sm flex justify-between"><span className="font-medium">{m.name}</span><span className="text-xs text-muted-foreground">{m.dosage} • {m.frequency}</span></li>
+            ))}
+          </ul>
+        }
+      </Block>
+
+      {surgeries.length > 0 && (
+        <Block title="Past surgeries" icon={Scissors}>
+          <ul className="space-y-1">
+            {surgeries.map((s) => <li key={s.id} className="text-sm">• {s.title} <span className="text-xs text-muted-foreground">({format(new Date(s.date), "MMM yyyy")})</span></li>)}
+          </ul>
+        </Block>
+      )}
+
+      <Block title="Recent reports" icon={FileText}>
+        {recentReports.length === 0 ? <p className="text-sm text-muted-foreground">None</p> :
+          <div className="grid grid-cols-4 gap-2">
+            {recentReports.map((r) => (
+              <a key={r.id} href={r.dataUrl} target="_blank" rel="noreferrer" className="rounded-xl bg-muted aspect-square overflow-hidden grid place-items-center">
+                {r.mimeType.startsWith("image/") ? <img src={r.dataUrl} className="h-full w-full object-cover" alt={r.name} /> : <FileText className="h-6 w-6 text-muted-foreground" />}
+              </a>
+            ))}
+          </div>
+        }
+      </Block>
+
+      <Block title="Health QR" icon={Stethoscope}>
+        <div className="grid place-items-center p-4">
+          <div className="bg-white p-3 rounded-2xl">
+            <QRCodeSVG value={summary} size={140} />
+          </div>
+          <p className="text-xs text-muted-foreground mt-2 text-center">Scan to view summary</p>
+        </div>
+      </Block>
+    </PageShell>
+  );
+}
+
+function Pill2({ icon: Icon, label, value }: any) {
+  return (
+    <div className="rounded-2xl bg-white/15 backdrop-blur p-3 flex-1 min-w-0">
+      <Icon className="h-4 w-4 opacity-90" />
+      <p className="text-[10px] opacity-80 mt-1">{label}</p>
+      <p className="font-semibold text-sm truncate">{value || "—"}</p>
+    </div>
+  );
+}
+
+function Block({ title, icon: Icon, children }: any) {
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-3xl bg-card shadow-soft p-4 mb-3"
+    >
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1.5">
+        <Icon className="h-3.5 w-3.5 text-primary" /> {title}
+      </h3>
+      {children}
+    </motion.section>
+  );
+}
