@@ -24,6 +24,7 @@ function TimelinePage() {
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<string>("all");
   const [q, setQ] = useState("");
+  const [active, setActive] = useState<TimelineEntry | null>(null);
 
   const sorted = useMemo(
     () =>
