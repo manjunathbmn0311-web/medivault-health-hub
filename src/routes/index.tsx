@@ -117,20 +117,24 @@ function Home() {
       {/* Quick stats */}
       <div className="grid grid-cols-3 gap-2 mb-5">
         {[
-          { label: "Reports", v: reports.length, Icon: FileText },
-          { label: "Entries", v: timeline.length, Icon: Clock },
-          { label: "Meds", v: meds.filter((m) => m.active).length, Icon: Pill },
+          { label: "Reports", v: reports.length, Icon: FileText, to: "/reports" as const },
+          { label: "Entries", v: timeline.length, Icon: Clock, to: "/timeline" as const },
+          { label: "Meds", v: meds.filter((m) => m.active).length, Icon: Pill, to: "/medications" as const },
         ].map((s, i) => (
           <motion.div
             key={s.label}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 + i * 0.05 }}
-            className="rounded-2xl bg-card shadow-soft p-3 text-center"
           >
-            <s.Icon className="h-4 w-4 mx-auto text-primary" />
-            <p className="text-xl font-bold mt-1">{s.v}</p>
-            <p className="text-[10px] text-muted-foreground">{s.label}</p>
+            <Link
+              to={s.to}
+              className="block rounded-2xl bg-card shadow-soft p-3 text-center active:scale-[0.97] transition"
+            >
+              <s.Icon className="h-4 w-4 mx-auto text-primary" />
+              <p className="text-xl font-bold mt-1">{s.v}</p>
+              <p className="text-[10px] text-muted-foreground">{s.label}</p>
+            </Link>
           </motion.div>
         ))}
       </div>
