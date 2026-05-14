@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 
 import { Toaster } from "@/components/ui/sonner";
+import { AppLock } from "@/components/AppLock";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
