@@ -49,6 +49,11 @@ export function AppLock({ children }: { children: ReactNode }) {
     setReady(true);
   }, []);
 
+  useEffect(() => {
+    if (!hasCred && hasPin) setMode("pin");
+    else if (hasCred && !hasPin) setMode("bio");
+  }, [hasCred, hasPin]);
+
   const markUnlocked = () => {
     sessionStorage.setItem(SESSION_KEY, "1");
     setUnlocked(true);
