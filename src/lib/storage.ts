@@ -36,6 +36,7 @@ export type TimelineEntry = {
   title: string;
   hospital?: string;
   doctor?: string;
+  doctorPhone?: string;
   details?: string;
 };
 

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageShell } from "@/components/PageShell";
 import { TimelineEntry, uid, useLocalStorage } from "@/lib/storage";
-import { Plus, Stethoscope, Pill, Scissors, FileText, Activity, X, Building2, Calendar } from "lucide-react";
+import { Plus, Stethoscope, Pill, Scissors, FileText, Activity, X, Building2, Calendar, Phone, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
 
@@ -24,6 +24,7 @@ function TimelinePage() {
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<string>("all");
   const [q, setQ] = useState("");
+  const [active, setActive] = useState<TimelineEntry | null>(null);
 
   const sorted = useMemo(
     () =>
@@ -83,7 +84,10 @@ function TimelinePage() {
                 <div className={`absolute left-0 top-1 h-10 w-10 rounded-2xl bg-gradient-to-br ${meta.color} grid place-items-center text-white shadow-soft`}>
                   <Icon className="h-5 w-5" />
                 </div>
-                <div className="rounded-2xl bg-card shadow-soft p-4 active:scale-[0.99] transition">
+                <button
+                  onClick={() => setActive(e)}
+                  className="w-full text-left rounded-2xl bg-card shadow-soft p-4 active:scale-[0.99] transition"
+                >
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">{meta.label}</p>
                     <p className="text-[10px] text-muted-foreground flex items-center gap-1">
@@ -96,14 +100,8 @@ function TimelinePage() {
                       <Building2 className="h-3 w-3" /> {[e.hospital, e.doctor].filter(Boolean).join(" • ")}
                     </p>
                   )}
-                  {e.details && <p className="text-sm text-foreground/80 mt-2">{e.details}</p>}
-                  <button
-                    onClick={() => setEntries(entries.filter((x) => x.id !== e.id))}
-                    className="mt-2 text-[11px] text-destructive font-medium"
-                  >
-                    Remove
-                  </button>
-                </div>
+                  {e.details && <p className="text-sm text-foreground/80 mt-2 line-clamp-2">{e.details}</p>}
+                </button>
               </motion.div>
             );
           })}
@@ -124,6 +122,19 @@ function TimelinePage() {
             onSave={(entry) => {
               setEntries([{ ...entry, id: uid() }, ...entries]);
               setOpen(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {active && (
+          <DetailSheet
+            entry={active}
+            onClose={() => setActive(null)}
+            onDelete={() => {
+              setEntries(entries.filter((x) => x.id !== active.id));
+              setActive(null);
             }}
           />
         )}
@@ -157,6 +168,7 @@ function EntrySheet({
     title: "",
     hospital: "",
     doctor: "",
+    doctorPhone: "",
     details: "",
   });
   return (
@@ -231,6 +243,15 @@ function EntrySheet({
             />
           </Field>
         </div>
+        <Field label="Doctor's phone">
+          <input
+            type="tel"
+            value={form.doctorPhone}
+            onChange={(e) => setForm({ ...form, doctorPhone: e.target.value })}
+            placeholder="+1 555 123 4567"
+            className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none"
+          />
+        </Field>
         <Field label="Details">
           <textarea
             value={form.details}
@@ -257,5 +278,112 @@ export function Field({ label, children }: { label: string; children: React.Reac
       <span className="text-xs text-muted-foreground font-medium ml-1">{label}</span>
       <div className="mt-1">{children}</div>
     </label>
+  );
+}
+
+function DetailSheet({
+  entry,
+  onClose,
+  onDelete,
+}: {
+  entry: TimelineEntry;
+  onClose: () => void;
+  onDelete: () => void;
+}) {
+  const meta = TYPE_META[entry.type];
+  const Icon = meta.icon;
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 bg-foreground/40 backdrop-blur-sm grid place-items-center p-5"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.92, y: 20, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        exit={{ scale: 0.92, y: 20, opacity: 0 }}
+        transition={{ type: "spring", damping: 24, stiffness: 280 }}
+        className="w-full max-w-md bg-card rounded-3xl shadow-card overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className={`relative p-5 bg-gradient-to-br ${meta.color} text-white`}>
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 h-9 w-9 rounded-full bg-white/20 backdrop-blur grid place-items-center"
+          >
+            <X className="h-4 w-4" />
+          </button>
+          <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur grid place-items-center">
+            <Icon className="h-6 w-6" />
+          </div>
+          <p className="text-[10px] uppercase tracking-wide opacity-90 mt-3 font-semibold">
+            {meta.label}
+          </p>
+          <h3 className="text-xl font-bold mt-0.5">{entry.title}</h3>
+          <p className="text-xs opacity-90 mt-1 flex items-center gap-1">
+            <Calendar className="h-3 w-3" /> {format(new Date(entry.date), "EEEE, dd MMM yyyy")}
+          </p>
+        </div>
+        <div className="p-5 space-y-3">
+          {entry.hospital && (
+            <Row icon={Building2} label="Hospital" value={entry.hospital} />
+          )}
+          {entry.doctor && (
+            <Row icon={Stethoscope} label="Doctor" value={entry.doctor} />
+          )}
+          {entry.doctorPhone && (
+            <a
+              href={`tel:${entry.doctorPhone}`}
+              className="flex items-center justify-between rounded-2xl gradient-primary text-primary-foreground p-3 shadow-glow active:scale-[0.98] transition"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-white/20 grid place-items-center">
+                  <Phone className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase opacity-80 font-semibold tracking-wide">
+                    Call doctor
+                  </p>
+                  <p className="font-semibold text-sm">{entry.doctorPhone}</p>
+                </div>
+              </div>
+              <Phone className="h-4 w-4" />
+            </a>
+          )}
+          {entry.details && (
+            <div className="rounded-2xl bg-muted p-4">
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold mb-1">
+                Notes
+              </p>
+              <p className="text-sm whitespace-pre-wrap">{entry.details}</p>
+            </div>
+          )}
+          <button
+            onClick={onDelete}
+            className="w-full mt-2 rounded-2xl bg-destructive/10 text-destructive py-3 text-sm font-semibold flex items-center justify-center gap-2"
+          >
+            <Trash2 className="h-4 w-4" /> Delete entry
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function Row({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl bg-muted p-3">
+      <div className="h-9 w-9 rounded-xl bg-background grid place-items-center text-primary">
+        <Icon className="h-4 w-4" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">
+          {label}
+        </p>
+        <p className="text-sm font-medium truncate">{value}</p>
+      </div>
+    </div>
   );
 }
