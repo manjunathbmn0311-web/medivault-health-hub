@@ -243,6 +243,15 @@ function EntrySheet({
             />
           </Field>
         </div>
+        <Field label="Doctor's phone">
+          <input
+            type="tel"
+            value={form.doctorPhone}
+            onChange={(e) => setForm({ ...form, doctorPhone: e.target.value })}
+            placeholder="+1 555 123 4567"
+            className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none"
+          />
+        </Field>
         <Field label="Details">
           <textarea
             value={form.details}
