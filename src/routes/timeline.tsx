@@ -168,6 +168,7 @@ function EntrySheet({
     title: "",
     hospital: "",
     doctor: "",
+    doctorPhone: "",
     details: "",
   });
   return (
