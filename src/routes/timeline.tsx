@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageShell } from "@/components/PageShell";
 import { TimelineEntry, uid, useLocalStorage } from "@/lib/storage";
-import { Plus, Stethoscope, Pill, Scissors, FileText, Activity, X, Building2, Calendar } from "lucide-react";
+import { Plus, Stethoscope, Pill, Scissors, FileText, Activity, X, Building2, Calendar, Phone, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
 
