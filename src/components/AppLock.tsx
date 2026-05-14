@@ -259,8 +259,6 @@ export function AppLock({ children }: { children: ReactNode }) {
                     Use {mode === "bio" ? "PIN" : "biometrics"} instead
                   </button>
                 )}
-                {!hasCred && hasPin && mode === "bio" && setMode("pin") /* auto-switch */}
-                {hasCred && !hasPin && mode === "pin" && setMode("bio")}
               </div>
             )}
 
