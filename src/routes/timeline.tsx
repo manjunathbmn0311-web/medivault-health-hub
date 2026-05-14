@@ -84,7 +84,10 @@ function TimelinePage() {
                 <div className={`absolute left-0 top-1 h-10 w-10 rounded-2xl bg-gradient-to-br ${meta.color} grid place-items-center text-white shadow-soft`}>
                   <Icon className="h-5 w-5" />
                 </div>
-                <div className="rounded-2xl bg-card shadow-soft p-4 active:scale-[0.99] transition">
+                <button
+                  onClick={() => setActive(e)}
+                  className="w-full text-left rounded-2xl bg-card shadow-soft p-4 active:scale-[0.99] transition"
+                >
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">{meta.label}</p>
                     <p className="text-[10px] text-muted-foreground flex items-center gap-1">
@@ -97,14 +100,8 @@ function TimelinePage() {
                       <Building2 className="h-3 w-3" /> {[e.hospital, e.doctor].filter(Boolean).join(" • ")}
                     </p>
                   )}
-                  {e.details && <p className="text-sm text-foreground/80 mt-2">{e.details}</p>}
-                  <button
-                    onClick={() => setEntries(entries.filter((x) => x.id !== e.id))}
-                    className="mt-2 text-[11px] text-destructive font-medium"
-                  >
-                    Remove
-                  </button>
-                </div>
+                  {e.details && <p className="text-sm text-foreground/80 mt-2 line-clamp-2">{e.details}</p>}
+                </button>
               </motion.div>
             );
           })}
