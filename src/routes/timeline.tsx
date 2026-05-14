@@ -126,6 +126,19 @@ function TimelinePage() {
           />
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {active && (
+          <DetailSheet
+            entry={active}
+            onClose={() => setActive(null)}
+            onDelete={() => {
+              setEntries(entries.filter((x) => x.id !== active.id));
+              setActive(null);
+            }}
+          />
+        )}
+      </AnimatePresence>
     </PageShell>
   );
 }
