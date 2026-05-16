@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
-import { DEFAULT_PROFILE, Medication, Period, Profile, Report, TimelineEntry, uid, useLocalStorage } from "@/lib/storage";
+import { Medication, Period, Report, TimelineEntry, uid, useActiveProfile, useLocalStorage } from "@/lib/storage";
 import { QRCodeSVG } from "qrcode.react";
 import { Activity, AlertCircle, Droplet, FileText, Pill, Plus, Scissors, Stethoscope, Trash2, CalendarHeart } from "lucide-react";
 import { differenceInDays, format } from "date-fns";
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/doctor")({
 });
 
 function DoctorPage() {
-  const [profile] = useLocalStorage<Profile>("mv-profile", DEFAULT_PROFILE);
+  const { profile } = useActiveProfile();
   const [timeline, setTimeline] = useLocalStorage<TimelineEntry[]>("mv-timeline", []);
   const [reports] = useLocalStorage<Report[]>("mv-reports", []);
   const [meds] = useLocalStorage<Medication[]>("mv-meds", []);
