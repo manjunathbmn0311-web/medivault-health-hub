@@ -216,6 +216,22 @@ function Home() {
         </div>
         <ChevronRight />
       </Link>
+
+      <Link
+        to="/settings"
+        className="mt-3 flex items-center justify-between rounded-3xl glass shadow-card p-4 active:scale-[0.98] transition"
+      >
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-2xl gradient-primary grid place-items-center text-primary-foreground">
+            <Download className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="font-semibold text-sm">Backup & Export</p>
+            <p className="text-xs text-muted-foreground">Encrypted backup, restore, PDF summary</p>
+          </div>
+        </div>
+        <ChevronRight />
+      </Link>
     </PageShell>
   );
 }
