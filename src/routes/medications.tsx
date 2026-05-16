@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageShell } from "@/components/PageShell";
-import { Medication, uid, useLocalStorage } from "@/lib/storage";
+import { Medication, uid, useScopedStorage } from "@/lib/storage";
 import { Plus, Pill, X, Power } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";

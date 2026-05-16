@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageShell } from "@/components/PageShell";
-import { Report, uid, useLocalStorage } from "@/lib/storage";
+import { Report, uid, useScopedStorage } from "@/lib/storage";
 import { Upload, FileText, Image as ImageIcon, X, Camera, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
