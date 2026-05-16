@@ -37,7 +37,10 @@ export function PageShell({
 
   return (
     <div className="min-h-screen gradient-soft dark:bg-background">
-      <div className="mx-auto max-w-md px-5 pt-6 pb-32">
+      <div
+        className="mx-auto max-w-md px-5 pb-32"
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1.5rem)" }}
+      >
         {(title || back) && (
           <header className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2 min-w-0">

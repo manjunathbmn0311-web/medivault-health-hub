@@ -81,3 +81,42 @@ export const DEFAULT_PROFILE: Profile = {
 };
 
 export const uid = () => Math.random().toString(36).slice(2, 10);
+
+export type ProfileRecord = Profile & { id: string; relation: string };
+
+export const RELATIONS = ["Self", "Wife", "Husband", "Son", "Daughter", "Mom", "Dad", "Other"];
+
+export const makeProfile = (relation = "Self"): ProfileRecord => ({
+  ...DEFAULT_PROFILE,
+  id: uid(),
+  relation,
+});
+
+export function useActiveProfile() {
+  const [profiles, setProfiles] = useLocalStorage<ProfileRecord[]>("mv-profiles", []);
+  const [activeId, setActiveId] = useLocalStorage<string>("mv-active-profile", "");
+
+  useEffect(() => {
+    if (profiles.length === 0) {
+      let seed: ProfileRecord;
+      try {
+        const legacy = localStorage.getItem("mv-profile");
+        const base = legacy ? (JSON.parse(legacy) as Profile) : DEFAULT_PROFILE;
+        seed = { ...DEFAULT_PROFILE, ...base, id: uid(), relation: "Self" };
+      } catch {
+        seed = makeProfile("Self");
+      }
+      setProfiles([seed]);
+      setActiveId(seed.id);
+    } else if (!profiles.find((p) => p.id === activeId)) {
+      setActiveId(profiles[0].id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const profile =
+    profiles.find((p) => p.id === activeId) ??
+    profiles[0] ?? { ...DEFAULT_PROFILE, id: "", relation: "Self" };
+
+  return { profiles, setProfiles, activeId, setActiveId, profile };
+}
