@@ -48,7 +48,7 @@ async function deriveKey(password: string, salt: Uint8Array, iterations: number)
     ["deriveKey"],
   );
   return crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt, iterations, hash: "SHA-256" },
+    { name: "PBKDF2", salt: salt as BufferSource, iterations, hash: "SHA-256" },
     baseKey,
     { name: "AES-GCM", length: 256 },
     false,
@@ -85,7 +85,7 @@ export async function createBackup(password: string): Promise<Blob> {
   const iterations = 150_000;
   const key = await deriveKey(password, salt, iterations);
   const ciphertext = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv },
+    { name: "AES-GCM", iv: iv as BufferSource },
     key,
     enc.encode(payload),
   );
@@ -143,7 +143,7 @@ export async function restoreBackup(
 
   let plain: ArrayBuffer;
   try {
-    plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, cipher);
+    plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv as BufferSource }, key, cipher);
   } catch {
     throw new Error("Wrong password or file tampered with");
   }
