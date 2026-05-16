@@ -30,9 +30,9 @@ function Stat({ icon: Icon, label, value, tone = "primary" }: any) {
 
 function Home() {
   const { profile } = useActiveProfile();
-  const [timeline] = useLocalStorage<TimelineEntry[]>("mv-timeline", []);
-  const [reports] = useLocalStorage<Report[]>("mv-reports", []);
-  const [meds] = useLocalStorage<Medication[]>("mv-meds", []);
+  const [timeline] = useScopedStorage<TimelineEntry[]>("mv-timeline", []);
+  const [reports] = useScopedStorage<Report[]>("mv-reports", []);
+  const [meds] = useScopedStorage<Medication[]>("mv-meds", []);
 
   const greeting = (() => {
     const h = new Date().getHours();

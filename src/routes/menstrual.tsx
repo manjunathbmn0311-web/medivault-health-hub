@@ -13,7 +13,7 @@ export const Route = createFileRoute("/menstrual")({
 });
 
 function MenstrualPage() {
-  const [periods, setPeriods] = useLocalStorage<Period[]>("mv-periods", []);
+  const [periods, setPeriods] = useScopedStorage<Period[]>("mv-periods", []);
   const [month, setMonth] = useState(new Date());
   const [open, setOpen] = useState(false);
 

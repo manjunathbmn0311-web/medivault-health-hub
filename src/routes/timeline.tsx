@@ -20,7 +20,7 @@ const TYPE_META: Record<TimelineEntry["type"], { label: string; icon: any; color
 };
 
 function TimelinePage() {
-  const [entries, setEntries] = useLocalStorage<TimelineEntry[]>("mv-timeline", []);
+  const [entries, setEntries] = useScopedStorage<TimelineEntry[]>("mv-timeline", []);
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<string>("all");
   const [q, setQ] = useState("");

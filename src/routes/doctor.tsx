@@ -14,10 +14,10 @@ export const Route = createFileRoute("/doctor")({
 
 function DoctorPage() {
   const { profile } = useActiveProfile();
-  const [timeline, setTimeline] = useLocalStorage<TimelineEntry[]>("mv-timeline", []);
-  const [reports] = useLocalStorage<Report[]>("mv-reports", []);
-  const [meds] = useLocalStorage<Medication[]>("mv-meds", []);
-  const [periods] = useLocalStorage<Period[]>("mv-periods", []);
+  const [timeline, setTimeline] = useScopedStorage<TimelineEntry[]>("mv-timeline", []);
+  const [reports] = useScopedStorage<Report[]>("mv-reports", []);
+  const [meds] = useScopedStorage<Medication[]>("mv-meds", []);
+  const [periods] = useScopedStorage<Period[]>("mv-periods", []);
 
   const menstrual = useMemo(() => {
     const sorted = [...periods].sort((a, b) => b.startDate.localeCompare(a.startDate));

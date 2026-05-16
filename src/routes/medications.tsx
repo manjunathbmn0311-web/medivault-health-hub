@@ -13,7 +13,7 @@ export const Route = createFileRoute("/medications")({
 });
 
 function MedsPage() {
-  const [meds, setMeds] = useLocalStorage<Medication[]>("mv-meds", []);
+  const [meds, setMeds] = useScopedStorage<Medication[]>("mv-meds", []);
   const [open, setOpen] = useState(false);
 
   const active = meds.filter((m) => m.active);

@@ -15,7 +15,7 @@ export const Route = createFileRoute("/reports")({
 const CATEGORIES = ["Lab", "X-Ray", "Scan", "Prescription", "Other"];
 
 function ReportsPage() {
-  const [reports, setReports] = useLocalStorage<Report[]>("mv-reports", []);
+  const [reports, setReports] = useScopedStorage<Report[]>("mv-reports", []);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("all");
   const [drag, setDrag] = useState(false);
