@@ -9,6 +9,7 @@ import {
 import { Field } from "./timeline";
 import { useEffect, useState } from "react";
 import { Check, Plus, Trash2, UserPlus, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const Route = createFileRoute("/profile")({
@@ -88,21 +89,16 @@ function ProfilePage() {
 
       <div className="rounded-3xl bg-card shadow-card p-5">
         <Field label="Relation">
-          <div className="flex flex-wrap gap-1.5">
-            {RELATIONS.map((r) => (
-              <button
-                key={r}
-                onClick={() => setDraft({ ...draft, relation: r })}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium ${
-                  draft.relation === r
-                    ? "gradient-primary text-primary-foreground"
-                    : "bg-muted"
-                }`}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
+          <Select value={draft.relation} onValueChange={(v) => setDraft({ ...draft, relation: v })}>
+            <SelectTrigger className="w-full rounded-xl bg-muted border-0 px-3 py-2.5 text-sm">
+              <SelectValue placeholder="Select relation" />
+            </SelectTrigger>
+            <SelectContent className="max-h-72">
+              {RELATIONS.map((r) => (
+                <SelectItem key={r} value={r}>{r}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </Field>
 
         <Field label="Full name">
