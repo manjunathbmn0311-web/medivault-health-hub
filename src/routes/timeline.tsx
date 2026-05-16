@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageShell } from "@/components/PageShell";
-import { TimelineEntry, uid, useLocalStorage } from "@/lib/storage";
+import { TimelineEntry, uid, useScopedStorage } from "@/lib/storage";
 import { Plus, Stethoscope, Pill, Scissors, FileText, Activity, X, Building2, Calendar, Phone, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
@@ -20,7 +20,7 @@ const TYPE_META: Record<TimelineEntry["type"], { label: string; icon: any; color
 };
 
 function TimelinePage() {
-  const [entries, setEntries] = useLocalStorage<TimelineEntry[]>("mv-timeline", []);
+  const [entries, setEntries] = useScopedStorage<TimelineEntry[]>("mv-timeline", []);
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<string>("all");
   const [q, setQ] = useState("");

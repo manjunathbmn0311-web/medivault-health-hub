@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
-import { Period, uid, useLocalStorage } from "@/lib/storage";
+import { Period, uid, useScopedStorage } from "@/lib/storage";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMemo, useState } from "react";
 import { Plus, X, Droplet } from "lucide-react";
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/menstrual")({
 });
 
 function MenstrualPage() {
-  const [periods, setPeriods] = useLocalStorage<Period[]>("mv-periods", []);
+  const [periods, setPeriods] = useScopedStorage<Period[]>("mv-periods", []);
   const [month, setMonth] = useState(new Date());
   const [open, setOpen] = useState(false);
 

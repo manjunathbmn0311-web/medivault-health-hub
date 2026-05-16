@@ -84,7 +84,72 @@ export const uid = () => Math.random().toString(36).slice(2, 10);
 
 export type ProfileRecord = Profile & { id: string; relation: string };
 
-export const RELATIONS = ["Self", "Wife", "Husband", "Son", "Daughter", "Mom", "Dad", "Other"];
+export const RELATIONS = [
+  "Self",
+  "Spouse",
+  "Wife",
+  "Husband",
+  "Partner",
+  "Son",
+  "Daughter",
+  "Child",
+  "Mom",
+  "Dad",
+  "Parent",
+  "Brother",
+  "Sister",
+  "Sibling",
+  "Grandfather",
+  "Grandmother",
+  "Grandparent",
+  "Grandson",
+  "Granddaughter",
+  "Uncle",
+  "Aunt",
+  "Cousin",
+  "Nephew",
+  "Niece",
+  "Father-in-law",
+  "Mother-in-law",
+  "Friend",
+  "Other",
+];
+
+/**
+ * Per-profile scoped storage. Key becomes `${prefix}::${activeId}` so each
+ * family member has their own isolated data set. When activeId changes the
+ * hook reloads the value from localStorage for the new profile.
+ */
+export function useScopedStorage<T>(prefix: string, initial: T) {
+  const { activeId } = useActiveProfile();
+  const key = activeId ? `${prefix}::${activeId}` : prefix;
+  const [value, setValue] = useState<T>(() => {
+    if (typeof window === "undefined") return initial;
+    try {
+      const v = localStorage.getItem(key);
+      return v ? (JSON.parse(v) as T) : initial;
+    } catch {
+      return initial;
+    }
+  });
+  // Reload when active profile (and therefore the key) changes.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const v = localStorage.getItem(key);
+      setValue(v ? (JSON.parse(v) as T) : initial);
+    } catch {
+      setValue(initial);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  useEffect(() => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {}
+  }, [key, value]);
+  return [value, setValue] as const;
+}
 
 export const makeProfile = (relation = "Self"): ProfileRecord => ({
   ...DEFAULT_PROFILE,

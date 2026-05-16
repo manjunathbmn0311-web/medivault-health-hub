@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageShell } from "@/components/PageShell";
-import { Report, uid, useLocalStorage } from "@/lib/storage";
+import { Report, uid, useScopedStorage } from "@/lib/storage";
 import { Upload, FileText, Image as ImageIcon, X, Camera, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/reports")({
 const CATEGORIES = ["Lab", "X-Ray", "Scan", "Prescription", "Other"];
 
 function ReportsPage() {
-  const [reports, setReports] = useLocalStorage<Report[]>("mv-reports", []);
+  const [reports, setReports] = useScopedStorage<Report[]>("mv-reports", []);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("all");
   const [drag, setDrag] = useState(false);

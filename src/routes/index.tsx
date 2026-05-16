@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { PageShell } from "@/components/PageShell";
-import { useLocalStorage, useActiveProfile, TimelineEntry, Report, Medication } from "@/lib/storage";
+import { useScopedStorage, useActiveProfile, TimelineEntry, Report, Medication } from "@/lib/storage";
 import { Activity, AlertCircle, Droplet, Phone, User, FileText, Pill, Clock, Calendar, QrCode, ShieldAlert, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -30,9 +30,9 @@ function Stat({ icon: Icon, label, value, tone = "primary" }: any) {
 
 function Home() {
   const { profile } = useActiveProfile();
-  const [timeline] = useLocalStorage<TimelineEntry[]>("mv-timeline", []);
-  const [reports] = useLocalStorage<Report[]>("mv-reports", []);
-  const [meds] = useLocalStorage<Medication[]>("mv-meds", []);
+  const [timeline] = useScopedStorage<TimelineEntry[]>("mv-timeline", []);
+  const [reports] = useScopedStorage<Report[]>("mv-reports", []);
+  const [meds] = useScopedStorage<Medication[]>("mv-meds", []);
 
   const greeting = (() => {
     const h = new Date().getHours();
