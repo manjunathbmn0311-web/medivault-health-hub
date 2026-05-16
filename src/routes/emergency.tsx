@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
-import { DEFAULT_PROFILE, Profile, useLocalStorage } from "@/lib/storage";
+import { useActiveProfile } from "@/lib/storage";
 import { Phone, ShieldAlert, Droplet, AlertCircle, Activity } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/emergency")({
 });
 
 function EmergencyPage() {
-  const [p] = useLocalStorage<Profile>("mv-profile", DEFAULT_PROFILE);
+  const { profile: p } = useActiveProfile();
   return (
     <PageShell title="Emergency" subtitle="Lock-screen card" back="/">
       <motion.div
