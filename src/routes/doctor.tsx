@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
-import { Medication, Period, Report, TimelineEntry, uid, useActiveProfile, useLocalStorage } from "@/lib/storage";
+import { Medication, Period, Report, TimelineEntry, uid, useActiveProfile, useScopedStorage } from "@/lib/storage";
 import { QRCodeSVG } from "qrcode.react";
 import { Activity, AlertCircle, Droplet, FileText, Pill, Plus, Scissors, Stethoscope, Trash2, CalendarHeart } from "lucide-react";
 import { differenceInDays, format } from "date-fns";
