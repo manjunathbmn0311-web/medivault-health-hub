@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { PageShell } from "@/components/PageShell";
-import { useLocalStorage, useActiveProfile, TimelineEntry, Report, Medication } from "@/lib/storage";
+import { useScopedStorage, useActiveProfile, TimelineEntry, Report, Medication } from "@/lib/storage";
 import { Activity, AlertCircle, Droplet, Phone, User, FileText, Pill, Clock, Calendar, QrCode, ShieldAlert, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/")({
