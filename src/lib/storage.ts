@@ -57,6 +57,19 @@ export type Medication = {
   startDate: string;
   endDate?: string;
   active: boolean;
+  /** Times of day (HH:mm) the medication should be taken. */
+  times?: string[];
+  /** Map of YYYY-MM-DD → list of HH:mm slots already taken that day. */
+  takenLog?: Record<string, string[]>;
+};
+
+export const FREQUENCY_COUNTS: Record<string, number> = {
+  "Once daily": 1,
+  "Twice daily": 2,
+  "Thrice daily": 3,
+  "Four times daily": 4,
+  Weekly: 1,
+  "As needed": 0,
 };
 
 export type Period = {
