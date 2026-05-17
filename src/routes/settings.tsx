@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Download, Upload, FileText, Lock, ShieldCheck, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
@@ -10,13 +10,14 @@ import {
   generateMedicalPDF,
   restoreBackup,
   suggestBackupName,
+  PatientBundle,
 } from "@/lib/backup";
 import {
   Medication,
+  ProfileRecord,
   Report,
   TimelineEntry,
   useActiveProfile,
-  useScopedStorage,
 } from "@/lib/storage";
 
 export const Route = createFileRoute("/settings")({
@@ -26,11 +27,28 @@ export const Route = createFileRoute("/settings")({
 
 type Busy = null | "backup" | "restore" | "pdf";
 
+/** Read a JSON array from localStorage; gracefully fall back to []. */
+function readJSON<T>(key: string, fallback: T): T {
+  try {
+    const v = localStorage.getItem(key);
+    return v ? (JSON.parse(v) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+/** Build a PatientBundle for every saved profile by reading their scoped keys. */
+function gatherAllPatients(profiles: ProfileRecord[]): PatientBundle[] {
+  return profiles.map((p) => ({
+    profile: p,
+    timeline: readJSON<TimelineEntry[]>(`mv-timeline::${p.id}`, []),
+    meds: readJSON<Medication[]>(`mv-meds::${p.id}`, []),
+    reports: readJSON<Report[]>(`mv-reports::${p.id}`, []),
+  }));
+}
+
 function SettingsPage() {
-  const { profile } = useActiveProfile();
-  const [timeline] = useScopedStorage<TimelineEntry[]>("mv-timeline", []);
-  const [meds] = useScopedStorage<Medication[]>("mv-meds", []);
-  const [reports] = useScopedStorage<Report[]>("mv-reports", []);
+  const { profiles } = useActiveProfile();
 
   const [busy, setBusy] = useState<Busy>(null);
   const [pwd, setPwd] = useState("");
@@ -42,15 +60,25 @@ function SettingsPage() {
 
   const fileRef = useRef<HTMLInputElement | null>(null);
 
+  const totalReports = useMemo(
+    () => gatherAllPatients(profiles).reduce((n, p) => n + p.reports.length, 0),
+    [profiles],
+  );
+
   const onBackup = async () => {
-    if (pwd.length < 6) return toast.error("Use at least 6 characters");
+    if (pwd && pwd.length < 4) return toast.error("Use at least 4 characters or leave blank");
     if (pwd !== pwd2) return toast.error("Passwords don't match");
     setBusy("backup");
     setStatus(null);
     try {
       const blob = await createBackup(pwd);
       downloadBlob(blob, suggestBackupName());
-      setStatus({ ok: true, text: "Backup saved to your downloads. Move it somewhere safe." });
+      setStatus({
+        ok: true,
+        text: pwd
+          ? "Encrypted backup saved to Downloads. Keep the password safe."
+          : "Backup saved to Downloads.",
+      });
       setPwd("");
       setPwd2("");
     } catch (e: any) {
@@ -61,8 +89,7 @@ function SettingsPage() {
   };
 
   const onRestore = async () => {
-    if (!restoreFile) return toast.error("Choose a .medbackup file");
-    if (!restorePwd) return toast.error("Enter the backup password");
+    if (!restoreFile) return toast.error("Choose your backup file");
     setBusy("restore");
     setStatus(null);
     try {
@@ -82,10 +109,15 @@ function SettingsPage() {
     setBusy("pdf");
     setStatus(null);
     try {
-      const blob = await generateMedicalPDF({ profile, timeline, meds, reports });
-      const name = `medical-summary-${(profile.name || "patient").replace(/\s+/g, "-").toLowerCase()}.pdf`;
-      downloadBlob(blob, name);
-      setStatus({ ok: true, text: "PDF summary generated." });
+      const patients = gatherAllPatients(profiles);
+      if (patients.length === 0) throw new Error("No profiles to export");
+      const blob = await generateMedicalPDF(patients);
+      const stamp = new Date().toISOString().slice(0, 10);
+      downloadBlob(blob, `medivault-all-patients-${stamp}.pdf`);
+      setStatus({
+        ok: true,
+        text: `PDF generated for ${patients.length} patient${patients.length > 1 ? "s" : ""}.`,
+      });
     } catch (e: any) {
       setStatus({ ok: false, text: e.message || "PDF failed" });
     } finally {
@@ -97,15 +129,15 @@ function SettingsPage() {
     <PageShell title="Backup & Export" subtitle="Your data, on your device">
       {/* Backup */}
       <section className="rounded-3xl bg-card shadow-card p-5 mb-4">
-        <Header icon={Download} title="Backup data" desc="Encrypted .medbackup file with everything." />
+        <Header icon={Download} title="Backup data" desc="One file with every profile and every report." />
         <p className="text-[11px] text-muted-foreground mb-3 inline-flex items-center gap-1">
-          <Lock className="h-3 w-3" /> AES-256-GCM, PBKDF2 password key.
+          <Lock className="h-3 w-3" /> Password is optional. Leave blank for a plain backup.
         </p>
         <input
           type="password"
           value={pwd}
           onChange={(e) => setPwd(e.target.value)}
-          placeholder="Create backup password"
+          placeholder="Password (optional)"
           className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none mb-2"
         />
         <input
@@ -115,22 +147,22 @@ function SettingsPage() {
           placeholder="Confirm password"
           className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none mb-3"
         />
-        <ActionBtn onClick={onBackup} loading={busy === "backup"} icon={Download} label="Create encrypted backup" />
+        <ActionBtn onClick={onBackup} loading={busy === "backup"} icon={Download} label="Create backup file" />
       </section>
 
       {/* Restore */}
       <section className="rounded-3xl bg-card shadow-card p-5 mb-4">
-        <Header icon={Upload} title="Restore backup" desc="Choose a .medbackup file from this device." />
+        <Header icon={Upload} title="Restore backup" desc="Pick the backup file you saved earlier." />
         <button
           onClick={() => fileRef.current?.click()}
           className="w-full rounded-xl bg-muted px-3 py-3 text-sm text-left mb-2 truncate"
         >
-          {restoreFile ? restoreFile.name : "Tap to choose .medbackup file"}
+          {restoreFile ? restoreFile.name : "Tap to choose backup file"}
         </button>
         <input
           ref={fileRef}
           type="file"
-          accept=".medbackup,application/octet-stream,application/json"
+          accept="*/*"
           hidden
           onChange={(e) => setRestoreFile(e.target.files?.[0] ?? null)}
         />
@@ -138,7 +170,7 @@ function SettingsPage() {
           type="password"
           value={restorePwd}
           onChange={(e) => setRestorePwd(e.target.value)}
-          placeholder="Backup password"
+          placeholder="Password (only if backup was encrypted)"
           className="w-full rounded-xl bg-muted px-3 py-2.5 text-sm outline-none mb-3"
         />
         <div className="flex gap-2 mb-3">
@@ -154,13 +186,17 @@ function SettingsPage() {
             </button>
           ))}
         </div>
-        <ActionBtn onClick={onRestore} loading={busy === "restore"} icon={ShieldCheck} label="Decrypt & restore" />
+        <ActionBtn onClick={onRestore} loading={busy === "restore"} icon={ShieldCheck} label="Restore backup" />
       </section>
 
       {/* PDF */}
       <section className="rounded-3xl bg-card shadow-card p-5 mb-4">
-        <Header icon={FileText} title="Medical summary PDF" desc="Doctor-friendly, printable. Active profile only." />
-        <ActionBtn onClick={onPdf} loading={busy === "pdf"} icon={FileText} label="Generate PDF" />
+        <Header
+          icon={FileText}
+          title="Medical summary PDF"
+          desc={`All ${profiles.length} profile${profiles.length > 1 ? "s" : ""} · ${totalReports} report${totalReports === 1 ? "" : "s"} (4 per page).`}
+        />
+        <ActionBtn onClick={onPdf} loading={busy === "pdf"} icon={FileText} label="Generate PDF (all patients)" />
       </section>
 
       {status && (
@@ -181,7 +217,7 @@ function SettingsPage() {
       )}
 
       <p className="text-[11px] text-center text-muted-foreground mt-4 px-4">
-        Everything stays on your device. No cloud, no login. Keep your backup password safe — without it the file cannot be opened.
+        Everything stays on your device. No cloud, no login.
       </p>
     </PageShell>
   );
