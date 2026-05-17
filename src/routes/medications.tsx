@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageShell } from "@/components/PageShell";
 import { FREQUENCY_COUNTS, Medication, uid, useScopedStorage } from "@/lib/storage";
-import { Plus, Pill, X, Power, Check, Bell, BellOff, Clock } from "lucide-react";
+import { Pill, X, Power, Check, Bell, Clock } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { FAB, Field } from "./timeline";
