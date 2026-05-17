@@ -136,6 +136,7 @@ export const RELATIONS = [
 export function useScopedStorage<T>(prefix: string, initial: T) {
   const { activeId } = useActiveProfile();
   const key = activeId ? `${prefix}::${activeId}` : prefix;
+  const loadedKeyRef = useRef<string>(key);
   const [value, setValue] = useState<T>(() => {
     if (typeof window === "undefined") return initial;
     try {
@@ -145,18 +146,25 @@ export function useScopedStorage<T>(prefix: string, initial: T) {
       return initial;
     }
   });
-  // Reload when active profile (and therefore the key) changes.
+  // When key (profile) changes, synchronously reload from storage for the new key
+  // and mark the loaded key. This avoids the next write effect overwriting the
+  // new profile's data with the previous profile's in-memory value.
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (loadedKeyRef.current === key) return;
     try {
       const v = localStorage.getItem(key);
       setValue(v ? (JSON.parse(v) as T) : initial);
     } catch {
       setValue(initial);
     }
+    loadedKeyRef.current = key;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
+  // Persist only when value belongs to the currently loaded key.
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (loadedKeyRef.current !== key) return;
     try {
       localStorage.setItem(key, JSON.stringify(value));
     } catch {}
